@@ -48,6 +48,11 @@ export function init(): void {
           console.log(`unset ${varName}`);
         }
       }
+
+      // Auto-start ccr for integration providers
+      if (provider.type === 'integration') {
+        console.log('command -v ccr >/dev/null 2>&1 && { ccr status 2>/dev/null | grep -q "Running" || ccr start 2>/dev/null; }');
+      }
     }
   } else {
     // No active provider - still export global vars
@@ -64,6 +69,11 @@ export function init(): void {
   // Output shell function wrapper for seamless switching
   console.log(`
 cld() {
+  if ! command -v bun >/dev/null 2>&1; then
+    echo "[cld] Error: bun is not installed or not in PATH" >&2
+    echo "[cld] Install bun: curl -fsSL https://bun.sh/install | bash" >&2
+    return 1
+  fi
   if [[ "$1" == "set" ]]; then
     eval "$(command cld "$@")"
   else
