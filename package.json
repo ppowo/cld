@@ -1,0 +1,14 @@
+{
+  "name": "cld",
+  "version": "0.1.0",
+  "description": "Claude Code Provider Switcher",
+  "type": "module",
+  "scripts": {
+    "build": "bun run build.ts",
+    "dev": "bun run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
