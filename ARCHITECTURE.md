@@ -267,16 +267,9 @@ Shell integration command designed to be eval'd in shell profiles:
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
 eval "$(cld init)"
-
-# Shell function for seamless switching (no new shell needed)
-cld() {
-  if [[ "$1" == "set" ]]; then
-    eval "$(command cld "$@")"
-  else
-    command cld "$@"
-  fi
-}
 ```
+
+The `init` command outputs both environment exports and a shell function wrapper for seamless switching.
 
 **Behavior:**
 

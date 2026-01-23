@@ -54,4 +54,14 @@ export function init(): void {
       console.log(`unset ${varName}`);
     }
   }
+
+  // Output shell function wrapper for seamless switching
+  console.log(`
+cld() {
+  if [[ "$1" == "set" ]]; then
+    eval "$(command cld "$@")"
+  else
+    command cld "$@"
+  fi
+}`);
 }

@@ -22,15 +22,6 @@ Shell Setup:
   Add to ~/.bashrc or ~/.zshrc:
 
     eval "$(cld init)"
-
-    # Shell function for seamless switching
-    cld() {
-      if [[ "$1" == "set" ]]; then
-        eval "$(command cld "$@")"
-      else
-        command cld "$@"
-      fi
-    }
 `);
 }
 
