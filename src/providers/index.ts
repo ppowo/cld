@@ -1,10 +1,10 @@
 import type { Provider } from './types';
-import { anthropicProvider } from './direct/anthropic';
+import { zaiProvider } from './direct/zai';
 import { syntheticProvider } from './direct/synthetic';
 import { routerFirmwareProvider } from './integration/router-firmware';
 
 export const providers: Provider[] = [
-  anthropicProvider,
+  zaiProvider,
   syntheticProvider,
   routerFirmwareProvider,
 ];

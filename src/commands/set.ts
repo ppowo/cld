@@ -74,9 +74,19 @@ export function set(providerName: string): void {
     console.log(`unset ${varName}`);
   }
 
+  // Export all configured API keys (so ${CLD_*} references resolve to latest values)
+  for (const [key, value] of Object.entries(config.keys)) {
+    console.log(`export ${key}="${value}"`);
+  }
+
   // Output export commands for new provider's vars
   for (const [key, value] of Object.entries(provider.env)) {
     console.log(`export ${key}="${value}"`);
+  }
+
+  // Restart router for integration providers (after exports are eval'd)
+  if (provider.type === 'integration') {
+    console.log('command -v ccr >/dev/null && (ccr stop 2>/dev/null; ccr restart)');
   }
 
   console.error(`[cld] Switched to ${providerName} (${provider.displayName})`);
