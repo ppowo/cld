@@ -1,5 +1,5 @@
 import { readConfig, writeConfig, configExists } from '../config';
-import { getProvider, getRequiredKeys, getProviderKeyName } from '../providers';
+import { getProvider, getRequiredKeys, getProviderEnv, GLOBAL_ENV_VARS } from '../providers';
 import { writeRouterConfig } from '../router-config';
 
 // Provider-specific env vars that should be unset when switching
@@ -28,6 +28,11 @@ export function set(providerName: string): void {
     // Unset all provider-specific vars
     for (const varName of PROVIDER_ENV_VARS) {
       console.log(`unset ${varName}`);
+    }
+
+    // Export globals even when disabled
+    for (const [key, value] of Object.entries(GLOBAL_ENV_VARS)) {
+      console.log(`export ${key}="${value}"`);
     }
 
     console.error('[cld] Disabled - using default Anthropic API');
@@ -79,8 +84,9 @@ export function set(providerName: string): void {
     console.log(`export ${key}="${value}"`);
   }
 
-  // Output export commands for new provider's vars
-  for (const [key, value] of Object.entries(provider.env)) {
+  // Output export commands for new provider's vars (merged with globals)
+  const providerEnv = getProviderEnv(provider);
+  for (const [key, value] of Object.entries(providerEnv)) {
     console.log(`export ${key}="${value}"`);
   }
 

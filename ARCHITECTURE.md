@@ -463,6 +463,44 @@ Router Config (~/.claude-code-router/config.json):
 
 ## Environment Variable Management
 
+### Global Environment Variables
+
+Global environment variables are defined in `src/providers/global.ts` and are automatically applied to ALL providers. These vars are merged with provider-specific environment variables, with provider-specific vars taking precedence (allowing overrides).
+
+**Implementation:**
+
+- **Location**: `src/providers/global.ts`
+- **Exported as**: `GLOBAL_ENV_VARS` constant object
+- **Merge strategy**: Global vars merged first, then provider-specific vars (provider wins on conflict)
+- **Helper function**: `getProviderEnv(provider)` in `src/providers/index.ts` performs the merge
+
+**Example:**
+
+```typescript
+// src/providers/global.ts
+export const GLOBAL_ENV_VARS: Record<string, string> = {
+  API_TIMEOUT_MS: '3000000',
+  // Add more global variables here as needed
+};
+```
+
+The `getProviderEnv()` function merges these with provider-specific vars:
+
+```typescript
+export function getProviderEnv(provider: Provider): Record<string, string> {
+  return {
+    ...GLOBAL_ENV_VARS,  // Global vars first (can be overridden)
+    ...provider.env,     // Provider-specific vars override globals
+  };
+}
+```
+
+**Usage:**
+- Global vars are automatically included when switching providers or running `cld init`
+- To modify: Edit `src/providers/global.ts` and rebuild with `bun run build`
+- Provider-specific vars can override global vars by defining the same key
+- **Important**: Global vars should NOT be added to `PROVIDER_ENV_VARS` arrays - they persist across all providers and should never be unset
+
 ### Always Exported
 
 These are always exported by `cld init` regardless of active provider:
@@ -473,6 +511,7 @@ These are always exported by `cld init` regardless of active provider:
 | `CLD_ROUTER_FIRMWARE_API_KEY` | User-configured |
 | `CLD_ANTHROPIC_API_KEY` | User-configured |
 | `CLD_ROUTER_KEY` | Hardcoded in app |
+| `API_TIMEOUT_MS` | Global env var (from `global.ts`) |
 
 ### Provider-Specific Variables
 

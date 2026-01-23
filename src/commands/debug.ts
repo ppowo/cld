@@ -1,5 +1,6 @@
 import { readConfig, configExists, getConfigPath, CLD_ROUTER_KEY } from '../config';
 import { readRouterConfig, routerConfigExists, getRouterConfigPath } from '../router-config';
+import { GLOBAL_ENV_VARS } from '../providers';
 
 function maskKey(key: string): string {
   if (!key || key.length < 10) return '***';
@@ -14,6 +15,7 @@ const ENV_VARS_TO_CHECK = [
   'ANTHROPIC_DEFAULT_SONNET_MODEL',
   'ANTHROPIC_DEFAULT_HAIKU_MODEL',
   'CLAUDE_CODE_SUBAGENT_MODEL',
+  ...Object.keys(GLOBAL_ENV_VARS),
 ];
 
 export function debug(): void {
