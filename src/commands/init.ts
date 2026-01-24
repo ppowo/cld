@@ -51,7 +51,7 @@ export function init(): void {
 
       // Auto-start ccr for integration providers
       if (provider.type === 'integration') {
-        console.log('command -v ccr >/dev/null 2>&1 && { ccr status 2>/dev/null | grep -q "Not Running" && { echo "[cld] Starting CCR..." >&2 && ccr start; }; }');
+        console.log('command -v ccr >/dev/null 2>&1 && { ccr status 2>/dev/null | grep -q "Not Running" && ccr restart 2>/dev/null; }');
       }
     }
   } else {
