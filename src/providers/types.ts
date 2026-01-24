@@ -10,6 +10,7 @@ export interface RouterProvider {
   api_base_url: string;
   api_key: string;
   models: string[];
+  transformer?: Record<string, unknown>;
 }
 
 export interface RouterRoutes {
