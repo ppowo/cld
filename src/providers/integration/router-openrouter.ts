@@ -25,10 +25,6 @@ export const routerOpenrouterProvider: IntegrationProvider = {
     ],
     Router: {
       default: 'openrouter,openai/gpt-oss-20b:free',
-      think: 'openrouter,openai/gpt-oss-20b:free',
-      background: 'openrouter,openai/gpt-oss-20b:free',
-      web_search: 'openrouter,openai/gpt-oss-20b:free',
-      long_context: 'openrouter,openai/gpt-oss-20b:free',
     },
   },
 };

@@ -15,10 +15,10 @@ export interface RouterProvider {
 
 export interface RouterRoutes {
   default: string;
-  think: string;
-  background: string;
-  web_search: string;
-  long_context: string;
+  think?: string;
+  background?: string;
+  web_search?: string;
+  long_context?: string;
 }
 
 export interface RouterConfig {
