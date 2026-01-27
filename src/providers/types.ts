@@ -27,6 +27,7 @@ export interface RouterConfig {
   APIKEY: string;
   Providers: RouterProvider[];
   Router: RouterRoutes;
+  fallback?: Record<string, string[]>;
 }
 
 export interface IntegrationProvider {
