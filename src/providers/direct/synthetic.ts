@@ -7,9 +7,9 @@ export const syntheticProvider: DirectProvider = {
   env: {
     ANTHROPIC_BASE_URL: 'https://api.synthetic.new/anthropic',
     ANTHROPIC_AUTH_TOKEN: '${CLD_SYNTHETIC_API_KEY}',
-    ANTHROPIC_DEFAULT_OPUS_MODEL: 'hf:zai-org/GLM-4.7',
-    ANTHROPIC_DEFAULT_SONNET_MODEL: 'hf:zai-org/GLM-4.7',
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: 'hf:zai-org/GLM-4.7',
-    CLAUDE_CODE_SUBAGENT_MODEL: 'hf:zai-org/GLM-4.7',
+    ANTHROPIC_DEFAULT_OPUS_MODEL: 'hf:moonshotai/Kimi-K2.5',
+    ANTHROPIC_DEFAULT_SONNET_MODEL: 'hf:moonshotai/Kimi-K2.5',
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: 'hf:moonshotai/Kimi-K2.5',
+    CLAUDE_CODE_SUBAGENT_MODEL: 'hf:moonshotai/Kimi-K2.5',
   },
 };
