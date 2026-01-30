@@ -1,8 +1,22 @@
+export interface QuotaResponse {
+  used: number;           // 0 to 1
+  reset: string | null;   // ISO 8601 timestamp
+  remaining?: number;     // Absolute count remaining (if available)
+  total?: number;         // Total quota (if available)
+}
+
+export interface QuotaConfig {
+  url: string;            // Quota endpoint URL
+  authKeyName: string;    // Key name for auth (e.g., 'CLD_ROUTER_FIRMWARE_API_KEY')
+  parser?: string;        // Named parser from quotaParsers (default: expects { used, reset })
+}
+
 export interface DirectProvider {
   type: 'direct';
   name: string;
   displayName: string;
   env: Record<string, string>;
+  quota?: QuotaConfig;
 }
 
 export interface RouterProvider {
@@ -36,6 +50,7 @@ export interface IntegrationProvider {
   displayName: string;
   env: Record<string, string>;
   routerConfig: RouterConfig;
+  quota?: QuotaConfig;
 }
 
 export type Provider = DirectProvider | IntegrationProvider;

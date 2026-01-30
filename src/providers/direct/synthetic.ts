@@ -12,4 +12,9 @@ export const syntheticProvider: DirectProvider = {
     ANTHROPIC_DEFAULT_HAIKU_MODEL: 'hf:zai-org/GLM-4.7',
     CLAUDE_CODE_SUBAGENT_MODEL: 'hf:zai-org/GLM-4.7',
   },
+  quota: {
+    url: 'https://api.synthetic.new/v2/quotas',
+    authKeyName: 'CLD_SYNTHETIC_API_KEY',
+    parser: 'synthetic',
+  },
 };

@@ -8,6 +8,11 @@ export const routerFirmwareProvider: IntegrationProvider = {
     ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
     ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
   },
+  quota: {
+    url: 'https://app.firmware.ai/api/v1/quota',
+    authKeyName: 'CLD_ROUTER_FIRMWARE_API_KEY',
+    parser: 'firmware',
+  },
   routerConfig: {
     HOST: '127.0.0.1',
     PORT: 3456,

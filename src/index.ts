@@ -31,7 +31,7 @@ switch (command) {
     break;
 
   case 'list':
-    list();
+    await list();
     break;
 
   case 'setup': {
