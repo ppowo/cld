@@ -71,44 +71,30 @@ export async function fetchQuota(
 
 export function formatQuota(result: QuotaResult): string {
   if (!result.success) {
-    return `[quota: error - ${result.error}]`;
+    return ' err';
   }
 
   const { used, reset, remaining: remainingCount, total } = result.data!;
   const remainingRatio = 1 - used;
 
-  // Bar shows remaining (full = good, empty = low)
-  const filledCount = Math.floor(remainingRatio * 10);
-  const emptyCount = 10 - filledCount;
-  const bar = '[' + '='.repeat(filledCount) + '-'.repeat(emptyCount) + ']';
+  // Quota amount (no "left" suffix)
+  const amt = remainingCount !== undefined && total !== undefined
+    ? `${remainingCount}/${total}`
+    : `${Math.floor(remainingRatio * 100)}%`;
 
-  // Show absolute numbers if available, otherwise percentage
-  const quotaStr = remainingCount !== undefined && total !== undefined
-    ? `${remainingCount}/${total} left`
-    : `${Math.floor(remainingRatio * 100)}% left`;
-
+  // Compact reset time (keep minutes)
   let resetStr = '';
   if (reset) {
-    const resetTime = new Date(reset);
-    const now = new Date();
-    const diffMs = resetTime.getTime() - now.getTime();
-
+    const diffMs = new Date(reset).getTime() - Date.now();
     if (diffMs > 0) {
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-      if (diffHours > 0) {
-        resetStr = `, resets in ${diffHours}h ${diffMinutes}m`;
-      } else if (diffMinutes > 0) {
-        resetStr = `, resets in ${diffMinutes}m`;
-      } else {
-        resetStr = `, resets soon`;
-      }
+      const h = Math.floor(diffMs / 3600000);
+      const m = Math.floor((diffMs % 3600000) / 60000);
+      resetStr = h > 0 ? ` ~${h}h${m > 0 ? m + 'm' : ''}` : ` ~${m}m`;
     }
   } else {
     // No active quota window - window starts on first use
-    resetStr = `, 5h window starts on use`;
+    resetStr = ' ~5h on use';
   }
 
-  return `[quota: ${bar} ${quotaStr}${resetStr}]`;
+  return ` ${amt}${resetStr}`;
 }

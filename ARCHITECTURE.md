@@ -48,19 +48,23 @@ cld/
 │   ├── index.ts              # CLI entry point
 │   ├── commands/
 │   │   ├── init.ts           # Shell integration (outputs exports for eval)
-│   │   ├── list.ts           # List providers
+│   │   ├── list.ts           # List providers (with parallel quota fetching)
 │   │   ├── setup.ts          # Configure provider API key
 │   │   ├── set.ts            # Switch active provider
 │   │   └── debug.ts          # Show env vars and config state
 │   ├── providers/
 │   │   ├── index.ts          # Provider registry
 │   │   ├── types.ts          # Provider type definitions
+│   │   ├── global.ts         # Global environment variables
 │   │   ├── direct/
-│   │   │   ├── anthropic.ts  # Direct Anthropic API
-│   │   │   └── synthetic.ts  # Synthetic API
+│   │   │   ├── zai.ts        # Zai API
+│   │   │   ├── synthetic.ts  # Synthetic API
+│   │   │   └── chutes.ts     # Chutes API
 │   │   └── integration/
-│   │       └── router-firmware.ts
+│   │       ├── router-firmware.ts
+│   │       └── router-openrouter.ts
 │   ├── config.ts             # Config file management (~/.cld/config.json)
+│   ├── quota.ts              # Quota fetching and formatting
 │   └── router-config.ts      # claude-code-router config generation
 ├── package.json
 ├── tsconfig.json
@@ -79,10 +83,11 @@ interface DirectProvider {
   name: string;                    // e.g., 'synthetic'
   displayName: string;             // e.g., 'Synthetic'
   env: Record<string, string>;     // Environment variables to export
+  quota?: QuotaConfig;             // Optional quota endpoint config
 }
 ```
 
-**Example: Synthetic Provider (needs model mapping)**
+**Example: Synthetic Provider (with quota and model mapping)**
 
 ```typescript
 const syntheticProvider: DirectProvider = {
@@ -92,25 +97,15 @@ const syntheticProvider: DirectProvider = {
   env: {
     ANTHROPIC_BASE_URL: 'https://api.synthetic.new/anthropic',
     ANTHROPIC_AUTH_TOKEN: '${CLD_SYNTHETIC_API_KEY}',
-    ANTHROPIC_DEFAULT_OPUS_MODEL: 'hf:zai-org/GLM-4.6',
-    ANTHROPIC_DEFAULT_SONNET_MODEL: 'hf:zai-org/GLM-4.6',
-    ANTHROPIC_DEFAULT_HAIKU_MODEL: 'hf:zai-org/GLM-4.6',
-    CLAUDE_CODE_SUBAGENT_MODEL: 'hf:zai-org/GLM-4.6',
+    ANTHROPIC_DEFAULT_OPUS_MODEL: 'hf:moonshotai/Kimi-K2.5',
+    ANTHROPIC_DEFAULT_SONNET_MODEL: 'hf:zai-org/GLM-4.7',
+    ANTHROPIC_DEFAULT_HAIKU_MODEL: 'hf:zai-org/GLM-4.7',
+    CLAUDE_CODE_SUBAGENT_MODEL: 'hf:zai-org/GLM-4.7',
   },
-};
-```
-
-**Example: OpenRouter (handles model aliases itself)**
-
-```typescript
-const openrouterProvider: DirectProvider = {
-  type: 'direct',
-  name: 'openrouter',
-  displayName: 'OpenRouter',
-  env: {
-    ANTHROPIC_BASE_URL: 'https://openrouter.ai/api/v1',
-    ANTHROPIC_AUTH_TOKEN: '${CLD_OPENROUTER_API_KEY}',
-    // No model vars needed - provider handles aliasing
+  quota: {
+    url: 'https://api.synthetic.new/v2/quotas',
+    authKeyName: 'CLD_SYNTHETIC_API_KEY',
+    parser: 'synthetic',
   },
 };
 ```
@@ -146,6 +141,7 @@ interface IntegrationProvider {
   displayName: string;             // e.g., 'Router: Firmware'
   env: Record<string, string>;     // Environment variables to export
   routerConfig: RouterConfig;      // Config to write to ~/.claude-code-router/config.json
+  quota?: QuotaConfig;             // Optional quota endpoint config
 }
 
 interface RouterConfig {
@@ -154,6 +150,7 @@ interface RouterConfig {
   APIKEY: string;                  // Always '$CLD_ROUTER_KEY' (hardcoded fake key)
   Providers: RouterProvider[];
   Router: RouterRoutes;
+  fallback?: Record<string, string[]>;  // Fallback routes per route type
 }
 
 interface RouterProvider {
@@ -161,18 +158,19 @@ interface RouterProvider {
   api_base_url: string;
   api_key: string;                 // Reference to env var, e.g., '$CLD_ROUTER_FIRMWARE_API_KEY'
   models: string[];
+  transformer?: Record<string, unknown>;  // Optional request transformer
 }
 
 interface RouterRoutes {
-  default: string;                 // 'provider,model' format
-  think: string;
-  background: string;
-  web_search: string;
-  long_context: string;
+  default: string;                 // 'provider,model' format (required)
+  think?: string;                  // Optional - falls back to default
+  background?: string;             // Optional - falls back to default
+  web_search?: string;             // Optional - falls back to default
+  long_context?: string;           // Optional - falls back to default
 }
 ```
 
-**Example: Router-Firmware Provider**
+**Example: Router-Firmware Provider (with quota and fallbacks)**
 
 ```typescript
 const routerFirmwareProvider: IntegrationProvider = {
@@ -183,6 +181,11 @@ const routerFirmwareProvider: IntegrationProvider = {
     ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
     ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
   },
+  quota: {
+    url: 'https://app.firmware.ai/api/v1/quota',
+    authKeyName: 'CLD_ROUTER_FIRMWARE_API_KEY',
+    parser: 'firmware',
+  },
   routerConfig: {
     HOST: '127.0.0.1',
     PORT: 3456,
@@ -192,18 +195,22 @@ const routerFirmwareProvider: IntegrationProvider = {
         name: 'firmware',
         api_base_url: 'https://app.firmware.ai/api/v1/chat/completions',
         api_key: '$CLD_ROUTER_FIRMWARE_API_KEY',
-        models: [
-          'claude-sonnet-4-5-20250929',
-          'claude-haiku-4-5-20251001',
-        ],
+        models: ['claude-opus-4-5', 'claude-sonnet-4-5-20250929', 'claude-haiku-4-5-20251001'],
       },
     ],
     Router: {
-      default: 'firmware,claude-sonnet-4-5-20250929',
-      think: 'firmware,claude-sonnet-4-5-20250929',
+      default: 'firmware,claude-opus-4-5',
+      think: 'firmware,claude-opus-4-5',
       background: 'firmware,claude-haiku-4-5-20251001',
       web_search: 'firmware,claude-haiku-4-5-20251001',
-      long_context: 'firmware,claude-sonnet-4-5-20250929',
+      long_context: 'firmware,claude-opus-4-5',
+    },
+    fallback: {
+      default: ['firmware,claude-sonnet-4-5-20250929'],
+      think: ['firmware,claude-sonnet-4-5-20250929'],
+      background: ['firmware,claude-haiku-4-5-20251001'],
+      web_search: ['firmware,claude-haiku-4-5-20251001'],
+      long_context: ['firmware,claude-sonnet-4-5-20250929'],
     },
   },
 };
@@ -228,18 +235,64 @@ export ANTHROPIC_AUTH_TOKEN=${CLD_ROUTER_KEY}
       "name": "firmware",
       "api_base_url": "https://app.firmware.ai/api/v1/chat/completions",
       "api_key": "$CLD_ROUTER_FIRMWARE_API_KEY",
-      "models": ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]
+      "models": ["claude-opus-4-5", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]
     }
   ],
   "Router": {
-    "default": "firmware,claude-sonnet-4-5-20250929",
-    "think": "firmware,claude-sonnet-4-5-20250929",
+    "default": "firmware,claude-opus-4-5",
+    "think": "firmware,claude-opus-4-5",
     "background": "firmware,claude-haiku-4-5-20251001",
     "web_search": "firmware,claude-haiku-4-5-20251001",
-    "long_context": "firmware,claude-sonnet-4-5-20250929"
+    "long_context": "firmware,claude-opus-4-5"
+  },
+  "fallback": {
+    "default": ["firmware,claude-sonnet-4-5-20250929"],
+    "think": ["firmware,claude-sonnet-4-5-20250929"],
+    "background": ["firmware,claude-haiku-4-5-20251001"],
+    "web_search": ["firmware,claude-haiku-4-5-20251001"],
+    "long_context": ["firmware,claude-sonnet-4-5-20250929"]
   }
 }
 ```
+
+## Quota System
+
+Providers can optionally define a `quota` field to enable real-time quota display in `cld list`.
+
+### QuotaConfig
+
+```typescript
+interface QuotaConfig {
+  url: string;            // Quota endpoint URL
+  authKeyName: string;    // Key name for auth (e.g., 'CLD_ROUTER_FIRMWARE_API_KEY')
+  parser?: string;        // Named parser from quotaParsers (default: expects { used, reset })
+}
+
+interface QuotaResponse {
+  used: number;           // 0 to 1 (percentage used as decimal)
+  reset: string | null;   // ISO 8601 timestamp, or null if no active window
+  remaining?: number;     // Absolute count remaining (if available)
+  total?: number;         // Total quota (if available)
+}
+```
+
+### Named Parsers
+
+Located in `src/quota.ts`, these transform provider-specific API responses into `QuotaResponse`:
+
+| Parser | API Format | Notes |
+|--------|------------|-------|
+| `synthetic` | `{ subscription: { limit, requests, renewsAt } }` | Calculates remaining from limit - requests |
+| `firmware` | `{ used, reset }` | Passes through directly, reset is null when no active 5h window |
+
+If no parser is specified, the response is expected to match `QuotaResponse` directly.
+
+### Quota Fetching
+
+- `cld list` fetches quota for all configured providers **in parallel**
+- 5-second timeout per request
+- Failed fetches show ` err` instead of quota info
+- Unconfigured providers skip quota fetch entirely
 
 ## Config Files
 
@@ -332,18 +385,29 @@ Different shells might need slightly different syntax (e.g., zsh has different a
 
 ### `cld list`
 
-Lists all available providers with their status:
+Lists all available providers with their status and quota info:
 
 ```
 $ cld list
 
 Providers:
-  anthropic          Direct Anthropic API           [not configured]
-  synthetic          Synthetic                      [configured]
-* router-firmware    Router: Firmware               [configured] (active)
+▸ zai               ✓ 45/100 ~2h30m
+  synthetic         ✓ 80% ~5h on use
+  router-openrouter ✓
+  chutes            ✗
+  router-firmware   ✓ 60% ~3h15m
 
-* = currently active (use 'cld set none' to disable)
+▸ = currently active
+✓ = configured, ✗ = not configured
+Quota shown as: remaining/total or percentage, with reset time
 ```
+
+**Quota Display:**
+
+- `45/100 ~2h30m` - Absolute count remaining / total, resets in ~2h30m
+- `80%` - Percentage remaining (when absolute count unavailable)
+- `~5h on use` - Quota window starts on first use (no active window)
+- No quota shown if provider doesn't support it or fetch failed
 
 ### `cld setup <provider> <api-key>`
 
@@ -379,10 +443,10 @@ unset CLAUDE_CODE_SUBAGENT_MODEL
 # Set new provider's variables
 export ANTHROPIC_BASE_URL="https://api.synthetic.new/anthropic"
 export ANTHROPIC_AUTH_TOKEN="${CLD_SYNTHETIC_API_KEY}"
-export ANTHROPIC_DEFAULT_OPUS_MODEL="hf:zai-org/GLM-4.6"
-export ANTHROPIC_DEFAULT_SONNET_MODEL="hf:zai-org/GLM-4.6"
-export ANTHROPIC_DEFAULT_HAIKU_MODEL="hf:zai-org/GLM-4.6"
-export CLAUDE_CODE_SUBAGENT_MODEL="hf:zai-org/GLM-4.6"
+export ANTHROPIC_DEFAULT_OPUS_MODEL="hf:moonshotai/Kimi-K2.5"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="hf:zai-org/GLM-4.7"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="hf:zai-org/GLM-4.7"
+export CLAUDE_CODE_SUBAGENT_MODEL="hf:zai-org/GLM-4.7"
 ```
 
 **Stderr (informational):**
@@ -480,7 +544,8 @@ Global environment variables are defined in `src/providers/global.ts` and are au
 // src/providers/global.ts
 export const GLOBAL_ENV_VARS: Record<string, string> = {
   API_TIMEOUT_MS: '3000000',
-  // Add more global variables here as needed
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+  CLAUDE_CODE_DISABLE_TERMINAL_TITLE: '1',
 };
 ```
 
@@ -509,9 +574,13 @@ These are always exported by `cld init` regardless of active provider:
 |----------|--------|
 | `CLD_SYNTHETIC_API_KEY` | User-configured |
 | `CLD_ROUTER_FIRMWARE_API_KEY` | User-configured |
-| `CLD_ANTHROPIC_API_KEY` | User-configured |
+| `CLD_ZAI_API_KEY` | User-configured |
+| `CLD_CHUTES_API_KEY` | User-configured |
+| `CLD_ROUTER_OPENROUTER_API_KEY` | User-configured |
 | `CLD_ROUTER_KEY` | Hardcoded in app |
 | `API_TIMEOUT_MS` | Global env var (from `global.ts`) |
+| `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` | Global env var (from `global.ts`) |
+| `CLAUDE_CODE_DISABLE_TERMINAL_TITLE` | Global env var (from `global.ts`) |
 
 ### Provider-Specific Variables
 
@@ -553,10 +622,11 @@ All providers are hardcoded in `src/providers/index.ts`:
 
 ```typescript
 export const providers: Provider[] = [
-  anthropicProvider,
+  zaiProvider,
   syntheticProvider,
+  routerOpenrouterProvider,
+  chutesProvider,
   routerFirmwareProvider,
-  // Add more providers here
 ];
 ```
 

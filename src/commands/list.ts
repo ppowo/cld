@@ -33,29 +33,23 @@ export async function list(): Promise<void> {
 
   console.log('\nProviders:');
 
+  // Calculate max name length for dynamic padding
+  const maxNameLen = Math.max(...providers.map(p => p.name.length));
+
   for (const provider of providers) {
     const keyName = getProviderKeyName(provider.name);
     const isConfigured = keyName in config.keys;
     const isActive = config.activeProvider === provider.name;
 
-    const marker = isActive ? '*' : ' ';
-    let status = isConfigured
-      ? isActive
-        ? '[configured] (active)'
-        : '[configured]'
-      : '[not configured]';
+    const marker = isActive ? '▸' : ' ';
+    const status = isConfigured ? '✓' : '✗';
 
     // Add quota info if available
     const quotaResult = quotaMap.get(provider.name);
-    if (quotaResult) {
-      status += ' ' + formatQuota(quotaResult);
-    }
+    const quotaStr = quotaResult ? formatQuota(quotaResult) : '';
 
-    const namePadded = provider.name.padEnd(18);
-    const displayPadded = provider.displayName.padEnd(25);
+    const namePadded = provider.name.padEnd(maxNameLen);
 
-    console.log(`${marker} ${namePadded} ${displayPadded} ${status}`);
+    console.log(`${marker} ${namePadded} ${status}${quotaStr}`);
   }
-
-  console.log("\n* = currently active (use 'cld set none' to disable)");
 }
