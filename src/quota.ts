@@ -21,11 +21,14 @@ const quotaParsers: Record<string, (data: unknown) => QuotaResponse> = {
       total: d.subscription.limit,
     };
   },
-  // Firmware: { used, reset } - reset is null when no active 5h window
+  // Firmware: { windowUsed, windowReset } - windowReset is null when no active 5h window
   firmware: (data) => {
-    const d = data as { used: number; reset: string | null };
-    // Pass through null reset to indicate no active window
-    return { used: d.used, reset: d.reset ?? null };
+    const d = data as {
+      windowUsed: number;
+      windowReset: string | null;
+    };
+    // windowReset is null when no active window started yet
+    return { used: d.windowUsed, reset: d.windowReset ?? null };
   },
 };
 
