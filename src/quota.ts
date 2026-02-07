@@ -21,15 +21,6 @@ const quotaParsers: Record<string, (data: unknown) => QuotaResponse> = {
       total: d.subscription.limit,
     };
   },
-  // Firmware: { windowUsed, windowReset } - windowReset is null when no active 5h window
-  firmware: (data) => {
-    const d = data as {
-      windowUsed: number;
-      windowReset: string | null;
-    };
-    // windowReset is null when no active window started yet
-    return { used: d.windowUsed, reset: d.windowReset ?? null };
-  },
 };
 
 export async function fetchQuota(

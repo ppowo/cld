@@ -7,7 +7,7 @@ export interface QuotaResponse {
 
 export interface QuotaConfig {
   url: string;            // Quota endpoint URL
-  authKeyName: string;    // Key name for auth (e.g., 'CLD_ROUTER_FIRMWARE_API_KEY')
+  authKeyName: string;    // Key name for auth (e.g., 'CLD_SYNTHETIC_API_KEY')
   parser?: string;        // Named parser from quotaParsers (default: expects { used, reset })
 }
 

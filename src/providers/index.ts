@@ -2,7 +2,6 @@ import type { Provider } from './types';
 import { zaiProvider } from './direct/zai';
 import { syntheticProvider } from './direct/synthetic';
 import { chutesProvider } from './direct/chutes';
-import { routerFirmwareProvider } from './integration/router-firmware';
 import { routerOpenrouterProvider } from './integration/router-openrouter';
 import { GLOBAL_ENV_VARS } from './global';
 
@@ -11,7 +10,6 @@ export const providers: Provider[] = [
   syntheticProvider,
   routerOpenrouterProvider,
   chutesProvider,
-  routerFirmwareProvider,
 ];
 
 export function getProvider(name: string): Provider | undefined {

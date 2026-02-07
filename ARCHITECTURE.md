@@ -61,7 +61,6 @@ cld/
 │   │   │   ├── synthetic.ts  # Synthetic API
 │   │   │   └── chutes.ts     # Chutes API
 │   │   └── integration/
-│   │       ├── router-firmware.ts
 │   │       └── router-openrouter.ts
 │   ├── config.ts             # Config file management (~/.cld/config.json)
 │   ├── quota.ts              # Quota fetching and formatting
@@ -124,7 +123,7 @@ The `cld setup <provider> <key>` command derives the key name from the provider 
 
 ```
 synthetic       → CLD_SYNTHETIC_API_KEY
-router-firmware → CLD_ROUTER_FIRMWARE_API_KEY
+router-openrouter → CLD_ROUTER_OPENROUTER_API_KEY
 openrouter      → CLD_OPENROUTER_API_KEY
 ```
 
@@ -170,21 +169,16 @@ interface RouterRoutes {
 }
 ```
 
-**Example: Router-Firmware Provider (with quota and fallbacks)**
+**Example: Router-OpenRouter Provider**
 
 ```typescript
-const routerFirmwareProvider: IntegrationProvider = {
+const routerOpenrouterProvider: IntegrationProvider = {
   type: 'integration',
-  name: 'router-firmware',
-  displayName: 'Router: Firmware',
+  name: 'router-openrouter',
+  displayName: 'Router: OpenRouter',
   env: {
     ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
     ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
-  },
-  quota: {
-    url: 'https://app.firmware.ai/api/v1/quota',
-    authKeyName: 'CLD_ROUTER_FIRMWARE_API_KEY',
-    parser: 'firmware',
   },
   routerConfig: {
     HOST: '127.0.0.1',
@@ -192,25 +186,15 @@ const routerFirmwareProvider: IntegrationProvider = {
     APIKEY: '$CLD_ROUTER_KEY',
     Providers: [
       {
-        name: 'firmware',
-        api_base_url: 'https://app.firmware.ai/api/v1/chat/completions',
-        api_key: '$CLD_ROUTER_FIRMWARE_API_KEY',
-        models: ['claude-opus-4-5', 'claude-sonnet-4-5-20250929', 'claude-haiku-4-5-20251001'],
+        name: 'openrouter',
+        api_base_url: 'https://openrouter.ai/api/v1/chat/completions',
+        api_key: '$CLD_ROUTER_OPENROUTER_API_KEY',
+        models: ['openai/gpt-oss-20b:free'],
+        transformer: { use: ['openrouter'] },
       },
     ],
     Router: {
-      default: 'firmware,claude-opus-4-5',
-      think: 'firmware,claude-opus-4-5',
-      background: 'firmware,claude-haiku-4-5-20251001',
-      web_search: 'firmware,claude-haiku-4-5-20251001',
-      long_context: 'firmware,claude-opus-4-5',
-    },
-    fallback: {
-      default: ['firmware,claude-sonnet-4-5-20250929'],
-      think: ['firmware,claude-sonnet-4-5-20250929'],
-      background: ['firmware,claude-haiku-4-5-20251001'],
-      web_search: ['firmware,claude-haiku-4-5-20251001'],
-      long_context: ['firmware,claude-sonnet-4-5-20250929'],
+      default: 'openrouter,openai/gpt-oss-20b:free',
     },
   },
 };
@@ -264,7 +248,7 @@ Providers can optionally define a `quota` field to enable real-time quota displa
 ```typescript
 interface QuotaConfig {
   url: string;            // Quota endpoint URL
-  authKeyName: string;    // Key name for auth (e.g., 'CLD_ROUTER_FIRMWARE_API_KEY')
+  authKeyName: string;    // Key name for auth (e.g., 'CLD_SYNTHETIC_API_KEY')
   parser?: string;        // Named parser from quotaParsers (default: expects { used, reset })
 }
 
@@ -283,7 +267,6 @@ Located in `src/quota.ts`, these transform provider-specific API responses into 
 | Parser | API Format | Notes |
 |--------|------------|-------|
 | `synthetic` | `{ subscription: { limit, requests, renewsAt } }` | Calculates remaining from limit - requests |
-| `firmware` | `{ used, reset }` | Passes through directly, reset is null when no active 5h window |
 
 If no parser is specified, the response is expected to match `QuotaResponse` directly.
 
@@ -302,10 +285,10 @@ Stores all configured API keys and the currently active provider:
 
 ```json
 {
-  "activeProvider": "router-firmware",
+  "activeProvider": "router-openrouter",
   "keys": {
     "CLD_SYNTHETIC_API_KEY": "sk-synth-xxx",
-    "CLD_ROUTER_FIRMWARE_API_KEY": "sk-firmware-xxx",
+    "CLD_ROUTER_OPENROUTER_API_KEY": "sk-or-xxx",
     "CLD_ANTHROPIC_API_KEY": "sk-ant-xxx"
   }
 }
@@ -349,7 +332,7 @@ export CLD_ROUTER_KEY="cld-local-router-key-do-not-share"
 # Full initialization (subsequent runs)
 export CLD_ROUTER_KEY="cld-local-router-key-do-not-share"
 export CLD_SYNTHETIC_API_KEY="sk-synth-xxx"
-export CLD_ROUTER_FIRMWARE_API_KEY="sk-firmware-xxx"
+export CLD_ROUTER_OPENROUTER_API_KEY="sk-or-xxx"
 export ANTHROPIC_BASE_URL="http://127.0.0.1:3456"
 export ANTHROPIC_AUTH_TOKEN="${CLD_ROUTER_KEY}"
 unset ANTHROPIC_DEFAULT_OPUS_MODEL
@@ -395,7 +378,6 @@ Providers:
   synthetic         ✓ 80% ~5h on use
   router-openrouter ✓
   chutes            ✗
-  router-firmware   ✓ 60% ~3h15m
 
 ▸ = currently active
 ✓ = configured, ✗ = not configured
@@ -498,15 +480,15 @@ Shows current environment variables and config state for debugging:
 $ cld debug
 
 Config (~/.cld/config.json):
-  activeProvider: router-firmware
+  activeProvider: router-openrouter
   keys:
     CLD_SYNTHETIC_API_KEY: sk-synth-***
-    CLD_ROUTER_FIRMWARE_API_KEY: sk-firm-***
+    CLD_ROUTER_OPENROUTER_API_KEY: sk-or-***
 
 Environment Variables:
   CLD_ROUTER_KEY: cld-local-***
   CLD_SYNTHETIC_API_KEY: sk-synth-***
-  CLD_ROUTER_FIRMWARE_API_KEY: sk-firm-***
+  CLD_ROUTER_OPENROUTER_API_KEY: sk-or-***
   ANTHROPIC_BASE_URL: http://127.0.0.1:3456
   ANTHROPIC_AUTH_TOKEN: cld-local-***
   ANTHROPIC_DEFAULT_OPUS_MODEL: (not set)
@@ -517,7 +499,7 @@ Environment Variables:
 Router Config (~/.claude-code-router/config.json):
   exists: true
   PORT: 3456
-  Providers: firmware
+  Providers: openrouter
 ```
 
 **Notes:**
@@ -573,7 +555,7 @@ These are always exported by `cld init` regardless of active provider:
 | Variable | Source |
 |----------|--------|
 | `CLD_SYNTHETIC_API_KEY` | User-configured |
-| `CLD_ROUTER_FIRMWARE_API_KEY` | User-configured |
+| `CLD_ROUTER_OPENROUTER_API_KEY` | User-configured |
 | `CLD_ZAI_API_KEY` | User-configured |
 | `CLD_CHUTES_API_KEY` | User-configured |
 | `CLD_ROUTER_OPENROUTER_API_KEY` | User-configured |
@@ -626,7 +608,6 @@ export const providers: Provider[] = [
   syntheticProvider,
   routerOpenrouterProvider,
   chutesProvider,
-  routerFirmwareProvider,
 ];
 ```
 
