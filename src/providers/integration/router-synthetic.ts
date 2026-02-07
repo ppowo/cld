@@ -1,9 +1,9 @@
 import type { IntegrationProvider } from '../types';
 
-export const routerOpenrouterProvider: IntegrationProvider = {
+export const syntheticProvider: IntegrationProvider = {
   type: 'integration',
-  name: 'router-openrouter',
-  displayName: 'Router: OpenRouter',
+  name: 'router-synthetic',
+  displayName: 'Router: Synthetic',
   env: {
     ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
     ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
@@ -14,12 +14,12 @@ export const routerOpenrouterProvider: IntegrationProvider = {
     APIKEY: '$CLD_ROUTER_KEY',
     Providers: [
       {
-        name: 'openrouter',
-        api_base_url: 'https://openrouter.ai/api/v1/chat/completions',
-        api_key: '$CLD_ROUTER_OPENROUTER_API_KEY',
-        models: ['openai/gpt-oss-20b:free'],
+        name: 'synthetic',
+        api_base_url: 'https://api.synthetic.new/anthropic/v1/messages',
+        api_key: '$CLD_ROUTER_SYNTHETIC_API_KEY',
+        models: ['hf:zai-org/GLM-4.7', 'hf:moonshotai/Kimi-K2.5'],
         transformer: {
-          use: ['openrouter'],
+          use: ['Anthropic'],
         },
       },
       {
@@ -33,10 +33,16 @@ export const routerOpenrouterProvider: IntegrationProvider = {
       },
     ],
     Router: {
-      default: 'openrouter,openai/gpt-oss-20b:free',
+      default: 'synthetic,hf:zai-org/GLM-4.7',
+      think: 'synthetic,hf:moonshotai/Kimi-K2.5',
     },
     fallback: {
       default: ['zai,glm-4.7'],
     },
+  },
+  quota: {
+    url: 'https://api.synthetic.new/v2/quotas',
+    authKeyName: 'CLD_ROUTER_SYNTHETIC_API_KEY',
+    parser: 'synthetic',
   },
 };
