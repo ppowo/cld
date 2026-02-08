@@ -17,7 +17,7 @@ export const routerOpenrouterProvider: IntegrationProvider = {
         name: 'openrouter',
         api_base_url: 'https://openrouter.ai/api/v1/chat/completions',
         api_key: '$CLD_ROUTER_OPENROUTER_API_KEY',
-        models: ['openai/gpt-oss-20b:free'],
+        models: ['openrouter/pony-alpha'],
         transformer: {
           use: ['openrouter'],
         },
@@ -33,7 +33,7 @@ export const routerOpenrouterProvider: IntegrationProvider = {
       },
     ],
     Router: {
-      default: 'openrouter,openai/gpt-oss-20b:free',
+      default: 'openrouter,openrouter/pony-alpha',
     },
     fallback: {
       default: ['zai,glm-4.7'],
