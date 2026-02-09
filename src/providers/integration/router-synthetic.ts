@@ -33,8 +33,7 @@ export const syntheticProvider: IntegrationProvider = {
       },
     ],
     Router: {
-      default: 'synthetic,hf:zai-org/GLM-4.7',
-      think: 'synthetic,hf:moonshotai/Kimi-K2.5',
+      default: 'synthetic,hf:moonshotai/Kimi-K2.5',
     },
     fallback: {
       default: ['zai,glm-4.7'],
