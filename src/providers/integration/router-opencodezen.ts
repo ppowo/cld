@@ -17,7 +17,7 @@ export const routerOpencodezenProvider: IntegrationProvider = {
         name: 'opencodezen',
         api_base_url: 'https://opencode.ai/zen/v1/chat/completions',
         api_key: '$CLD_ROUTER_OPENCODEZEN_API_KEY',
-        models: ['kimi-k2.5'],
+        models: ['kimi-k2.5', 'gpt-4.7'],
         transformer: {
           use: ['openrouter'],
         },
@@ -33,10 +33,12 @@ export const routerOpencodezenProvider: IntegrationProvider = {
       },
     ],
     Router: {
-      default: 'opencodezen,kimi-k2.5',
+      default: 'opencodezen,gpt-4.7',
+      think: 'opencodezen,kimi-k2.5',
     },
     fallback: {
-      default: ['synthetic,hf:moonshotai/Kimi-K2.5'],
+      default: ['synthetic,hf:zai-org/GLM-4.7'],
+      think: ['synthetic,hf:moonshotai/Kimi-K2.5'],
     },
   },
 };

@@ -31,8 +31,9 @@ export interface RouterRoutes {
   default: string;
   think?: string;
   background?: string;
-  web_search?: string;
-  long_context?: string;
+  longContext?: string;
+  webSearch?: string;
+  image?: string;
 }
 
 export interface RouterConfig {
