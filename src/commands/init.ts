@@ -1,15 +1,6 @@
 import { readConfig, writeConfig, configExists, ensureConfigDir, CLD_ROUTER_KEY } from '../config';
+import { PROVIDER_ENV_VARS } from '../constants';
 import { getProvider, getProviderEnv, GLOBAL_ENV_VARS } from '../providers';
-
-// Provider-specific env vars that should be unset when not active
-const PROVIDER_ENV_VARS = [
-  'ANTHROPIC_BASE_URL',
-  'ANTHROPIC_AUTH_TOKEN',
-  'ANTHROPIC_DEFAULT_OPUS_MODEL',
-  'ANTHROPIC_DEFAULT_SONNET_MODEL',
-  'ANTHROPIC_DEFAULT_HAIKU_MODEL',
-  'CLAUDE_CODE_SUBAGENT_MODEL',
-];
 
 export function init(): void {
   const isFirstRun = !configExists();

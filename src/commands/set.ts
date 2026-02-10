@@ -1,16 +1,7 @@
 import { readConfig, writeConfig, configExists } from '../config';
+import { PROVIDER_ENV_VARS } from '../constants';
 import { getProvider, getRequiredKeys, getProviderEnv, GLOBAL_ENV_VARS } from '../providers';
 import { writeRouterConfig } from '../router-config';
-
-// Provider-specific env vars that should be unset when switching
-const PROVIDER_ENV_VARS = [
-  'ANTHROPIC_BASE_URL',
-  'ANTHROPIC_AUTH_TOKEN',
-  'ANTHROPIC_DEFAULT_OPUS_MODEL',
-  'ANTHROPIC_DEFAULT_SONNET_MODEL',
-  'ANTHROPIC_DEFAULT_HAIKU_MODEL',
-  'CLAUDE_CODE_SUBAGENT_MODEL',
-];
 
 export function set(providerName: string): void {
   if (!configExists()) {

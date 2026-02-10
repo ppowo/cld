@@ -1,44 +1,22 @@
+import { upstream, models, providers } from '../upstream';
+import { ROUTER_DEFAULTS, ROUTER_ENV } from './shared';
 import type { IntegrationProvider } from '../types';
 
 export const routerOpencodezenProvider: IntegrationProvider = {
   type: 'integration',
   name: 'router-opencodezen',
   displayName: 'Router: OpenCodeZen',
-  env: {
-    ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
-    ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
-  },
+  env: ROUTER_ENV,
   routerConfig: {
-    HOST: '127.0.0.1',
-    PORT: 3456,
-    APIKEY: '$CLD_ROUTER_KEY',
-    Providers: [
-      {
-        name: 'opencodezen',
-        api_base_url: 'https://opencode.ai/zen/v1/chat/completions',
-        api_key: '$CLD_ROUTER_OPENCODEZEN_API_KEY',
-        models: ['kimi-k2.5', 'gpt-4.7'],
-        transformer: {
-          use: ['openrouter'],
-        },
-      },
-      {
-        name: 'synthetic',
-        api_base_url: 'https://api.synthetic.new/anthropic/v1/messages',
-        api_key: '$CLD_ROUTER_SYNTHETIC_API_KEY',
-        models: ['hf:moonshotai/Kimi-K2.5'],
-        transformer: {
-          use: ['Anthropic'],
-        },
-      },
-    ],
+    ...ROUTER_DEFAULTS,
+    Providers: [upstream.opencodezen, upstream.synthetic],
     Router: {
-      default: 'opencodezen,gpt-4.7',
-      think: 'opencodezen,kimi-k2.5',
+      default: `${providers.opencodezen},${models.opencodezen.gpt47}`,
+      think: `${providers.opencodezen},${models.opencodezen.kimi25}`,
     },
     fallback: {
-      default: ['synthetic,hf:zai-org/GLM-4.7'],
-      think: ['synthetic,hf:moonshotai/Kimi-K2.5'],
+      default: [`${providers.synthetic},${models.synthetic.glm47}`],
+      think: [`${providers.synthetic},${models.synthetic.kimi25}`],
     },
   },
 };

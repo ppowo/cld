@@ -1,4 +1,5 @@
 import { readConfig, configExists, getConfigPath, CLD_ROUTER_KEY } from '../config';
+import { PROVIDER_ENV_VARS } from '../constants';
 import { readRouterConfig, routerConfigExists, getRouterConfigPath } from '../router-config';
 import { GLOBAL_ENV_VARS } from '../providers';
 
@@ -7,16 +8,7 @@ function maskKey(key: string): string {
   return key.substring(0, 8) + '***';
 }
 
-const ENV_VARS_TO_CHECK = [
-  'CLD_ROUTER_KEY',
-  'ANTHROPIC_BASE_URL',
-  'ANTHROPIC_AUTH_TOKEN',
-  'ANTHROPIC_DEFAULT_OPUS_MODEL',
-  'ANTHROPIC_DEFAULT_SONNET_MODEL',
-  'ANTHROPIC_DEFAULT_HAIKU_MODEL',
-  'CLAUDE_CODE_SUBAGENT_MODEL',
-  ...Object.keys(GLOBAL_ENV_VARS),
-];
+const ENV_VARS_TO_CHECK = ['CLD_ROUTER_KEY', ...PROVIDER_ENV_VARS, ...Object.keys(GLOBAL_ENV_VARS)];
 
 export function debug(): void {
   // Config file state

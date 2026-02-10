@@ -1,43 +1,21 @@
+import { upstream, models, providers } from '../upstream';
+import { ROUTER_DEFAULTS, ROUTER_ENV } from './shared';
 import type { IntegrationProvider } from '../types';
 
 export const syntheticProvider: IntegrationProvider = {
   type: 'integration',
   name: 'router-synthetic',
   displayName: 'Router: Synthetic',
-  env: {
-    ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
-    ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
-  },
+  env: ROUTER_ENV,
   routerConfig: {
-    HOST: '127.0.0.1',
-    PORT: 3456,
-    APIKEY: '$CLD_ROUTER_KEY',
-    Providers: [
-      {
-        name: 'synthetic',
-        api_base_url: 'https://api.synthetic.new/anthropic/v1/messages',
-        api_key: '$CLD_ROUTER_SYNTHETIC_API_KEY',
-        models: ['hf:zai-org/GLM-4.7', 'hf:moonshotai/Kimi-K2.5'],
-        transformer: {
-          use: ['Anthropic'],
-        },
-      },
-      {
-        name: 'zai',
-        api_base_url: 'https://api.z.ai/api/anthropic/v1/messages',
-        api_key: '$CLD_ROUTER_ZAI_API_KEY',
-        models: ['glm-4.7'],
-        transformer: {
-          use: ['Anthropic'],
-        },
-      },
-    ],
+    ...ROUTER_DEFAULTS,
+    Providers: [upstream.synthetic, upstream.zai],
     Router: {
-      default: 'synthetic,hf:zai-org/GLM-4.7',
-      think: 'synthetic,hf:moonshotai/Kimi-K2.5',
+      default: `${providers.synthetic},${models.synthetic.glm47}`,
+      think: `${providers.synthetic},${models.synthetic.kimi25}`,
     },
     fallback: {
-      default: ['zai,glm-4.7'],
+      default: [`${providers.zai},${models.zai.glm47}`],
     },
   },
   quota: {
