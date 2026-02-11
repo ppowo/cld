@@ -13,7 +13,7 @@ export const models = {
   },
   synthetic: {
     glm47: 'hf:zai-org/GLM-4.7',
-    kimi25: 'hf:moonshotai/Kimi-K2.5',
+    kimi25: 'hf:nvidia/Kimi-K2.5-NVFP4',
   },
   openrouter: {
     pony: 'openrouter/pony-alpha',
