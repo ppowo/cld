@@ -11,7 +11,7 @@ export const routerOpenrouterProvider: IntegrationProvider = {
     ...ROUTER_DEFAULTS,
     Providers: [upstream.openrouter, upstream.zai],
     Router: {
-      default: `${providers.openrouter},${models.openrouter.pony}`,
+      default: `${providers.openrouter},${models.openrouter.free}`,
     },
     fallback: {
       default: [`${providers.zai},${models.zai.glm47}`],
