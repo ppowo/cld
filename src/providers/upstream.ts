@@ -27,17 +27,17 @@ export const models = {
 export const upstream: Record<string, RouterProvider> = {
   zai: {
     name: providers.zai,
-    api_base_url: 'https://api.z.ai/api/coding/paas/v4/chat/completions',
+    api_base_url: 'https://api.z.ai/api/anthropic/v1/messages',
     api_key: '$CLD_ROUTER_ZAI_API_KEY',
     models: Object.values(models.zai),
-    transformer: { use: ['openrouter'] },
+    transformer: { use: ['Anthropic'] },
   },
   synthetic: {
     name: providers.synthetic,
-    api_base_url: 'https://api.synthetic.new/openai/v1/chat/completions',
+    api_base_url: 'https://api.synthetic.new/anthropic/v1/messages',
     api_key: '$CLD_ROUTER_SYNTHETIC_API_KEY',
     models: Object.values(models.synthetic),
-    transformer: { use: ['openrouter'] },
+    transformer: { use: ['Anthropic'] },
   },
   openrouter: {
     name: providers.openrouter,
