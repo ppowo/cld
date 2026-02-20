@@ -9,12 +9,12 @@ export const routerOpenrouterProvider: IntegrationProvider = {
   env: ROUTER_ENV,
   routerConfig: {
     ...ROUTER_DEFAULTS,
-    Providers: [upstream.openrouter, upstream.zai],
+    Providers: [upstream.openrouter, upstream.synthetic],
     Router: {
       default: `${providers.openrouter},${models.openrouter.free}`,
     },
     fallback: {
-      default: [`${providers.zai},${models.zai.glm47}`],
+      default: [`${providers.synthetic},${models.synthetic.glm47}`],
     },
   },
 };

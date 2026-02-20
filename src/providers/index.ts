@@ -1,12 +1,10 @@
 import type { Provider } from './types';
-import { zaiProvider } from './integration/router-zai';
 import { syntheticProvider } from './integration/router-synthetic';
 import { routerOpenrouterProvider } from './integration/router-openrouter';
 import { routerOpencodezenProvider } from './integration/router-opencodezen';
 import { GLOBAL_ENV_VARS } from './global';
 
 export const providers: Provider[] = [
-  zaiProvider,
   syntheticProvider,
   routerOpenrouterProvider,
   routerOpencodezenProvider,

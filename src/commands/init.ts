@@ -44,6 +44,18 @@ export function init(): void {
       if (provider.type === 'integration') {
         console.log('command -v ccr >/dev/null 2>&1 && { ccr status 2>/dev/null | grep -q "Not Running" && ccr restart 2>/dev/null; }');
       }
+    } else {
+      console.error(`[cld] Active provider '${config.activeProvider}' no longer exists. Disabling.`);
+      config.activeProvider = null;
+      writeConfig(config);
+
+      for (const [key, value] of Object.entries(GLOBAL_ENV_VARS)) {
+        console.log(`export ${key}="${value}"`);
+      }
+
+      for (const varName of PROVIDER_ENV_VARS) {
+        console.log(`unset ${varName}`);
+      }
     }
   } else {
     // No active provider - still export global vars

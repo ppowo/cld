@@ -9,13 +9,14 @@ export const syntheticProvider: IntegrationProvider = {
   env: ROUTER_ENV,
   routerConfig: {
     ...ROUTER_DEFAULTS,
-    Providers: [upstream.synthetic, upstream.zai],
+    Providers: [upstream.synthetic, upstream.openrouter],
     Router: {
       default: `${providers.synthetic},${models.synthetic.glm47}`,
       think: `${providers.synthetic},${models.synthetic.kimi25}`,
     },
     fallback: {
-      default: [`${providers.zai},${models.zai.glm47}`],
+      default: [`${providers.openrouter},${models.openrouter.free}`],
+      think: [`${providers.openrouter},${models.openrouter.free}`],
     },
   },
   quota: {

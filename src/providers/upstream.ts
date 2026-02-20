@@ -1,16 +1,12 @@
 import type { RouterProvider } from './types';
 
 export const providers = {
-  zai: 'zai',
   synthetic: 'synthetic',
   openrouter: 'openrouter',
   opencodezen: 'opencodezen',
 } as const;
 
 export const models = {
-  zai: {
-    glm47: 'glm-4.7',
-  },
   synthetic: {
     glm47: 'hf:zai-org/GLM-4.7',
     kimi25: 'hf:nvidia/Kimi-K2.5-NVFP4',
@@ -25,13 +21,6 @@ export const models = {
 } as const;
 
 export const upstream: Record<string, RouterProvider> = {
-  zai: {
-    name: providers.zai,
-    api_base_url: 'https://api.z.ai/api/anthropic/v1/messages',
-    api_key: '$CLD_ROUTER_ZAI_API_KEY',
-    models: Object.values(models.zai),
-    transformer: { use: ['Anthropic'] },
-  },
   synthetic: {
     name: providers.synthetic,
     api_base_url: 'https://api.synthetic.new/anthropic/v1/messages',
