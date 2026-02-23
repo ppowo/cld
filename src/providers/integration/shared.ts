@@ -1,6 +1,7 @@
 export const ROUTER_ENV = {
   ANTHROPIC_BASE_URL: 'http://127.0.0.1:3456',
   ANTHROPIC_AUTH_TOKEN: '${CLD_ROUTER_KEY}',
+  MAX_THINKING_TOKENS: '0',
 } as const;
 
 export const ROUTER_DEFAULTS = {
