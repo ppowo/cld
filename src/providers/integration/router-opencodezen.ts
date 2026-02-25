@@ -9,14 +9,12 @@ export const routerOpencodezenProvider: IntegrationProvider = {
   env: ROUTER_ENV,
   routerConfig: {
     ...ROUTER_DEFAULTS,
-    Providers: [upstream.opencodezen, upstream.synthetic],
+    Providers: [upstream.opencodezen, upstream.openrouter],
     Router: {
-      default: `${providers.opencodezen},${models.opencodezen.gpt47}`,
-      think: `${providers.opencodezen},${models.opencodezen.kimi25}`,
+      default: `${providers.opencodezen},${models.opencodezen.bigpickle}`
     },
     fallback: {
-      default: [`${providers.synthetic},${models.synthetic.glm47}`],
-      think: [`${providers.synthetic},${models.synthetic.kimi25}`],
+      default:[`${providers.openrouter},${models.openrouter.free}`]
     },
   },
 };

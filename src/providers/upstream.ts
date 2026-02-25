@@ -8,15 +8,15 @@ export const providers = {
 
 export const models = {
   synthetic: {
-    glm47: 'hf:zai-org/GLM-4.7',
-    kimi25: 'hf:nvidia/Kimi-K2.5-NVFP4',
+    minimax25: 'hf:MiniMaxAI/MiniMax-M2.5',
+    qwen35_397b: 'hf:Qwen/Qwen3.5-397B-A17B',
+    kimi25_nvfp4: 'hf:nvidia/Kimi-K2.5-NVFP4',
   },
   openrouter: {
     free: 'openrouter/free',
   },
   opencodezen: {
-    kimi25: 'kimi-k2.5',
-    gpt47: 'gpt-4.7',
+    bigpickle: 'big-pickle',
   },
 } as const;
 

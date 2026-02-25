@@ -11,12 +11,14 @@ export const syntheticProvider: IntegrationProvider = {
     ...ROUTER_DEFAULTS,
     Providers: [upstream.synthetic, upstream.openrouter],
     Router: {
-      default: `${providers.synthetic},${models.synthetic.glm47}`,
-      think: `${providers.synthetic},${models.synthetic.kimi25}`,
+      default: `${providers.synthetic},${models.synthetic.minimax25}`,
+      think: `${providers.synthetic},${models.synthetic.kimi25_nvfp4}`,
+      longContext: `${providers.synthetic},${models.synthetic.qwen35_397b}`,
+      background: `${providers.openrouter},${models.openrouter.free}`,
+      webSearch: `${providers.openrouter},${models.openrouter.free}`,
     },
     fallback: {
-      default: [`${providers.openrouter},${models.openrouter.free}`],
-      think: [`${providers.openrouter},${models.openrouter.free}`],
+      default:[`${providers.openrouter},${models.openrouter.free}`]
     },
   },
   quota: {
